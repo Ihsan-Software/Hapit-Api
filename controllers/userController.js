@@ -18,8 +18,7 @@ exports.resizeImage = catchAsync(async (req, res, next) => {
         .resize(600, 600)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`uploads/images/users/${filename}`);
-
+        .toFile(`uploads/images/user/${filename}`);
     // save image in db
     req.body.photo = filename;
     next();

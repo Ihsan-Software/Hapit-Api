@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema({
 
     photo:{
         type: String,
-        default: 'default.jpg'
+        default: 'default.jpeg'
     },
     bio:{
         type: String,
@@ -92,7 +92,7 @@ userSchema.pre('save', async function (next) {
 
 const setImageURL = (doc) => {
     if (doc.photo) {
-        const imageUrl = `${process.env.SERVER_URL}/users/${doc.photo}`;
+        const imageUrl = `${process.env.SERVER_URL}/user/${doc.photo}`;
         doc.photo = imageUrl;
     }
 };
