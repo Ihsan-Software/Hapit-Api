@@ -60,8 +60,11 @@ exports.updateLoggedUserData = catchAsync(async (req, res, next) => {
 
 exports.getUsersDegree = catchAsync(async (req, res) => {
 
-    const users = await User.find().select(' bio name photo totalDegree level').sort({ totalDegree: -1 });
-
+    const users = await User.find().select(' bio name photo totalDegree level')
+    users.sort((a, b) => {
+    // Convert totalDegree from string to integer and compare
+    return parseInt(b.totalDegree) - parseInt(a.totalDegree);
+    });
     return res.status(200).json({
         status: "success",
         requestTime: req.requestTime,
