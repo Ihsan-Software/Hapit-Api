@@ -92,7 +92,7 @@ userSchema.pre('save', async function (next) {
 
 const setImageURL = (doc) => {
     if (doc.photo) {
-        const imageUrl = `${process.env.BASE_URL}/users/${doc.photo}`;
+        const imageUrl = `${process.env.SERVER_URL}/users/${doc.photo}`;
         doc.photo = imageUrl;
     }
 };
