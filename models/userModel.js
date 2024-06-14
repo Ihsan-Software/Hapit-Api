@@ -40,21 +40,21 @@ const userSchema = new mongoose.Schema({
         default: 'user'
     },
     totalDegree: {
-        type: String,
-        default: '0'
+        type: Number,
+        default: 0
+    },
+        degree: {
+        type: Number,
+        default: 0
     },
     level: {
-        type: String,
-        default: '0'
+        type: Number,
+        default: 0
     },
     todayOpen: {
         type: Date,
         default: new Date()
     },
-    degree: {
-        type: String,
-        default: '0'
-    }
 
 },
     {timestamps: true},
