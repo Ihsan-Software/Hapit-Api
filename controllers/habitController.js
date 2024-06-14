@@ -108,10 +108,10 @@ exports.getTodayHabits = catchAsync(async (req, res, next) => {
 
     // update user degree if it open app in new day
     const user = await User.findById(req.user.id);
-    let newDegree = parseInt(user.degree) + 3;
+    let newDegree = user.degree + 3;
 
     if(new Date().toISOString().split('T')[0] > user.todayOpen.toISOString().split('T')[0]) {
-        await User.findByIdAndUpdate(req.user.id, { degree: newDegree.toString(), todayOpen: new Date()});
+        await User.findByIdAndUpdate(req.user.id, { degree: newDegree, todayOpen: new Date()});
     }
     
     
@@ -345,11 +345,11 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
     achievements.push([consecutiveDaysObj]);
     // End Consecutive Days
     const user = await User.findById(userID);
-    userDegree += parseInt(user.degree);
+    userDegree += user.degree;
     userLevel = Math.floor(userDegree / 10); 
     // update user degree and level
 
-    await User.findByIdAndUpdate(userID, { totalDegree: userDegree.toString(), level: userLevel.toString()});
+    await User.findByIdAndUpdate(userID, { totalDegree: userDegree, level: userLevel});
 
     // send response depending on url
     if (req.url.split("/")[req.url.split("/").length - 1] === 'getUserAchievements') {
