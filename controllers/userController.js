@@ -49,8 +49,8 @@ exports.updateLoggedUserData = catchAsync(async (req, res, next) => {
         req.user._id,
         {
         name: req.body.name,
-        email: req.body.email,
         photo: req.body.photo,
+        bio: req.body.bio
         },
         { new: true }
     );
