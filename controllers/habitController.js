@@ -5,6 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 const factory = require('../controllers/handlerController');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId; 
+const Mood = require('../models/moodModel')
 
 //CURD FUNCTIONS
 exports.getHabits = factory.getAll(Habit)
@@ -582,3 +583,83 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
         next();
     }
 })
+
+exports.statistics = catchAsync(async (req, res, next) => {
+    const habits = await Habit.aggregate([
+        {   
+            $match: {
+            user: new ObjectId(`${req.user.id}`)
+            }
+        },
+        {
+            $unwind: "$date"
+        },
+        {
+            $group: {
+            _id: { name: "$name", icon: "$icon" },
+            count: { $sum: 1 }
+            }
+        },
+        {
+            $group: {
+            _id: null,
+            totalCount: { $sum: "$count" },
+            habits: { $push: { name: "$_id.name", icon: "$_id.icon", count: "$count" } }
+            }
+        },
+        {
+            $unwind: "$habits"
+        },
+        {
+            $project: {
+            _id: 0,
+            name: "$habits.name",
+            icon: "$habits.icon",
+            count: "$habits.count",
+            percentage: {
+                $multiply: [{ $divide: ["$habits.count", "$totalCount"] }, 100]
+            }
+            }
+        }
+    ]);
+    const moods = await Mood.aggregate([
+        {   
+            $match: {
+                user: new ObjectId(`${req.user.id}`)
+            }
+        },
+        {
+            $group: {
+            _id: "$name",
+            count: { $sum: 1 }
+            }
+        },
+        {
+            $group: {
+            _id: null,
+            totalCount: { $sum: "$count" },
+            moods: { $push: { name: "$_id", count: "$count" } }
+            }
+        },
+        {
+            $unwind: "$moods"
+        },
+        {
+            $project: {
+            _id: 0,
+            name: "$moods.name",
+            count: "$moods.count",
+            percentage: {
+                $multiply: [{ $divide: ["$moods.count", "$totalCount"] }, 100]
+            }
+            }
+        }
+    ])
+
+    res.status(200).json({
+        status: "success",
+        requestTime: req.requestTime,
+        habits,
+        moods
+    });
+});

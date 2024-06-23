@@ -12,6 +12,7 @@ router.route("/checkHabit/:checkHabitID").patch(habitController.setSpecialDayAnd
 router.route('/unCheckHabit/:uncheckHabitID').patch(habitController.setSpecialDayAndTime, habitController.unCheck, habitController.userAchievements, habitController.getTodayHabits);
 router.route('/getTodayHabits').get(habitController.setSpecialDayAndTime, habitController.getTodayHabits);
 router.route("/getUserAchievements").get(habitController.userAchievements);
+router.route("/statistics").get(habitController.statistics);
 router.route('/:id').delete(habitController.deleteHabit);
 
 router.use(authController.restrictTo('admin'))
