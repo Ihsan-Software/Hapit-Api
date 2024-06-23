@@ -179,145 +179,217 @@ exports.getTodayHabits = catchAsync(async (req, res, next) => {
 
 exports.userAchievements = catchAsync(async (req, res, next) => {
     // Complete Habit
-    let cho = [
-        {
-            achieveName : "Complete Habit", 
-            description : "Complete Habit 1 times (3 Points)",
-            isAchieved : false ,
-            iconName: "ic_complete_1",
-            counter: 0
-        }, {
-            achieveName : "Complete Habit", 
-            description : "Complete Habit 2 times (6 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_2",
-            counter: 0
-        },        {
-            achieveName : "Complete Habit", 
-            description : "Complete Habit 30 times (90 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_30",
-            counter: 0
-        },        {
-            achieveName : "Complete Habit", 
-            description : "Complete Habit 50 times (150 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_50",
-            counter: 0
-        },        {
-            achieveName : "Complete Habit", 
-            description : "Complete Habit 75 times (255 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_75",
-            counter: 0
-        },        {
-            achieveName : "Complete Habit", 
-            description : "Complete Habit 90 times (270 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_90",
-            counter: 0
-        },
-    ], pdo = [
-        {
-            achieveName : "perfect days", 
-            description : "perfect days 3 times (9 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_3",
-            totalHabit: 0
-        },        {
-            achieveName : "perfect days", 
-            description : "perfect days 10 times (30 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_10",
-            totalHabit: 0
-        },{
-            achieveName : "perfect days", 
-            description : "perfect days 20 times (60 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_20",
-            totalHabit: 0
-        },        {
-            achieveName : "perfect days", 
-            description : "perfect days 30 times (90 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_30",
-            totalHabit: 0
-        },        {
-            achieveName : "perfect days", 
-            description : "perfect days 40 times (120 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_40",
-            totalHabit: 0
-        },        {
-            achieveName : "perfect days", 
-            description : "perfect days 50 times (150 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_50",
-            totalHabit: 0
-        },       {
-            achieveName : "perfect days", 
-            description : "perfect days 80 times (240 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_80",
-            totalHabit: 0
-        },       {
-            achieveName : "perfect days", 
-            description : "perfect days 100 times (300 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_100",
-            totalHabit: 0
-        },
-    ],cdo = [
-        {
-            achieveName : "consecutive days", 
-            description : "perfect days 3 times (9 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_3",
-            totalHabit: 0
-        },        {
-            achieveName : "consecutive days", 
-            description : "perfect days 10 times (30 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_10",
-            totalHabit: 0
-        },{
-            achieveName : "consecutive days", 
-            description : "perfect days 20 times (60 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_20",
-            totalHabit: 0
-        },        {
-            achieveName : "consecutive days", 
-            description : "perfect days 30 times (90 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_30",
-            totalHabit: 0
-        },        {
-            achieveName : "consecutive days", 
-            description : "perfect days 40 times (120 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_40",
-            totalHabit: 0
-        },        {
-            achieveName : "consecutive days", 
-            description : "perfect days 50 times (150 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_50",
-            totalHabit: 0
-        },       {
-            achieveName : "consecutive days", 
-            description : "perfect days 80 times (240 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_80",
-            totalHabit: 0
-        },       {
-            achieveName : "consecutive days", 
-            description : "perfect days 100 times (300 Points)",
-            isAchieved : false ,
-            iconName : "ic_complete_100",
-            totalHabit: 0
-        },
-    ], userID = req.user.id, userDegree = 0, achievements = [], userLevel = 0; 
+    let cho=[], pdo = [], cdo=[], userID = req.user.id, userDegree = 0, achievements = [], userLevel = 0, choNumber = [1, 10, 30, 50, 75, 90],pdoNumber = [3, 10, 20, 30, 40, 50, 80, 100], cdoNumber = [3, 10, 20, 30, 40, 50, 80, 100];
+    if (req.url.split("/")[req.url.split("/").length - 1].split('?')[0] === 'getUserAchievements') {
+        choNumber.forEach(num => {
+            if (req.query.language && req.query.language == 'ar') {
+                cho.push({
+                    achieveName : "العادات المكتملة", 
+                    description : `عادة مكتملة ${num} مرة (${num*3} نقطة)`,
+                    isAchieved : false ,
+                    iconName: `ic_complete_${num}`,
+                    counter: 0,
+                    point: num*3
+                })
+            }
+            else if (req.query.language && req.query.language == 'en'){
+                cho.push({
+                achieveName : "Complete Habit", 
+                description : `Complete Habit ${num} times (${num*3} Points)`,
+                isAchieved : false ,
+                iconName: `ic_complete_${num}`,
+                counter: 0,
+                point: num*3
+                
+                })
+            }
+        }) 
+        pdoNumber.forEach(num => {
+            if (req.query.language && req.query.language == 'ar') {
+                pdo.push({
+                    achieveName : "الايام المثالية", 
+                    description : `يوم مثالي ${num} يوم (${num*3} نقطة)`,
+                    isAchieved : false ,
+                    iconName: `ic_complete_${num}`,
+                    totalHabit: 0,
+                    point: num*3
+                })
+            }
+            else if (req.query.language && req.query.language == 'en'){
+                pdo.push({
+                achieveName: "perfect days",
+                description: `perfect days ${num} times (${num*3} Points)`,
+                isAchieved: false,
+                iconName: `ic_complete_${num}`,
+                totalHabit: 0,
+                point: num*3
+            })
+            }
+        }) 
+            cdoNumber.forEach(num => {
+            if (req.query.language && req.query.language == 'ar') {
+                cdo.push({
+                    achieveName : "الايام المتتالية", 
+                    description : `ايام متتالية ${num} يوم (${num*3} نقطة)`,
+                    isAchieved : false ,
+                    iconName: `ic_complete_${num}`,
+                    totalHabit: 0,
+                    point: num*3
+                })
+            }
+            else if (req.query.language && req.query.language == 'en'){
+                cdo.push({
+                achieveName: "consecutive days",
+                description: "perfect days 3 times (9 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_3",
+                totalHabit: 0,
+                point: num*3
+            })
+            }
+        }) 
+    }
+    else {
+        cho = [
+            {
+                achieveName: "Complete Habit",
+                description: "Complete Habit 1 times (3 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_1",
+                counter: 0
+            }, {
+                achieveName: "Complete Habit",
+                description: "Complete Habit 2 times (6 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_2",
+                counter: 0
+            }, {
+                achieveName: "Complete Habit",
+                description: "Complete Habit 30 times (90 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_30",
+                counter: 0
+            }, {
+                achieveName: "Complete Habit",
+                description: "Complete Habit 50 times (150 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_50",
+                counter: 0
+            }, {
+                achieveName: "Complete Habit",
+                description: "Complete Habit 75 times (255 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_75",
+                counter: 0
+            }, {
+                achieveName: "Complete Habit",
+                description: "Complete Habit 90 times (270 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_90",
+                counter: 0
+            },
+        ], pdo = [
+            {
+                achieveName: "perfect days",
+                description: "perfect days 3 times (9 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_3",
+                totalHabit: 0
+            }, {
+                achieveName: "perfect days",
+                description: "perfect days 10 times (30 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_10",
+                totalHabit: 0
+            }, {
+                achieveName: "perfect days",
+                description: "perfect days 20 times (60 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_20",
+                totalHabit: 0
+            }, {
+                achieveName: "perfect days",
+                description: "perfect days 30 times (90 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_30",
+                totalHabit: 0
+            }, {
+                achieveName: "perfect days",
+                description: "perfect days 40 times (120 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_40",
+                totalHabit: 0
+            }, {
+                achieveName: "perfect days",
+                description: "perfect days 50 times (150 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_50",
+                totalHabit: 0
+            }, {
+                achieveName: "perfect days",
+                description: "perfect days 80 times (240 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_80",
+                totalHabit: 0
+            }, {
+                achieveName: "perfect days",
+                description: "perfect days 100 times (300 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_100",
+                totalHabit: 0
+            },
+        ], cdo = [
+            {
+                achieveName: "consecutive days",
+                description: "perfect days 3 times (9 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_3",
+                totalHabit: 0
+            }, {
+                achieveName: "consecutive days",
+                description: "perfect days 10 times (30 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_10",
+                totalHabit: 0
+            }, {
+                achieveName: "consecutive days",
+                description: "perfect days 20 times (60 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_20",
+                totalHabit: 0
+            }, {
+                achieveName: "consecutive days",
+                description: "perfect days 30 times (90 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_30",
+                totalHabit: 0
+            }, {
+                achieveName: "consecutive days",
+                description: "perfect days 40 times (120 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_40",
+                totalHabit: 0
+            }, {
+                achieveName: "consecutive days",
+                description: "perfect days 50 times (150 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_50",
+                totalHabit: 0
+            }, {
+                achieveName: "consecutive days",
+                description: "perfect days 80 times (240 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_80",
+                totalHabit: 0
+            }, {
+                achieveName: "consecutive days",
+                description: "perfect days 100 times (300 Points)",
+                isAchieved: false,
+                iconName: "ic_complete_100",
+                totalHabit: 0
+            },
+        ]
+    }
     const completedDailyHabits = await Habit.aggregate([
         {   
             $match: {
@@ -486,30 +558,24 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
     await User.findByIdAndUpdate(userID, { totalDegree: userDegree, level: userLevel});
 
     // send response depending on url
-    if (req.url.split("/")[req.url.split("/").length - 1] === 'getUserAchievements') {
+    if (req.url.split("/")[req.url.split("/").length - 1].split('?')[0] === 'getUserAchievements') {
         res.status(200).json({
             status: 'success',
             requestTime: req.requestTime,
             //resultCompletedDailyHabits,
             //resultPerfectDays,
             //resultConsecutiveDays,
-            achievements:[...cho, ...pdo, ...cdo],
-            userDegree,
-            userLevel
+            achievements:[...cho, ...pdo, ...cdo]
         });
     }
     else {
         req.userDetails = {
             status: 'success',
             requestTime: req.requestTime,
-            resultCompletedDailyHabits,
-            resultPerfectDays,
-            resultConsecutiveDays,
-            achievements: {
-                AcquiredHabits: achievements[0],
-                PerfectDays: achievements[1],
-                ConsecutiveDays: achievements[2],
-            },
+            //resultCompletedDailyHabits,
+            //resultPerfectDays,
+            //resultConsecutiveDays,
+            achievements:[...cho, ...pdo, ...cdo],
             userDegree,
             userLevel
         };
