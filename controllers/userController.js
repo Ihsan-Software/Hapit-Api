@@ -58,6 +58,18 @@ exports.updateLoggedUserData = catchAsync(async (req, res, next) => {
     res.status(200).json({ data: updatedUser });
 });
 
+
+exports.updateUserBio = catchAsync(async (req, res, next) => {
+    const updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+        bio: req.body.bio
+        },
+        { new: true }
+    );
+
+    res.status(200).json({ data: updatedUser });
+});
 exports.getUsersDegree = catchAsync(async (req, res) => {
 
     const users = await User.find().sort({ totalDegree: -1 }).select(' bio name photo totalDegree level');

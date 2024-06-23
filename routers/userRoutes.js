@@ -14,7 +14,8 @@ router.use(authController.protect_)
 router.get('/myInformation', userController.getME, userController.getUser)
 router.route("/getUsersDegree").get(userController.getUsersDegree);
 router.post('/updateMyPassword', authController.updateMyPassword)
-router.patch('/updateMyInformation', userController.uploadUserImage, userController.resizeImage,userController.updateLoggedUserData)
+router.patch('/updateMyInformation', userController.uploadUserImage, userController.resizeImage, userController.updateLoggedUserData)
+router.patch('/updateUserBio', userController.updateUserBio)
 router.use(authController.restrictTo('admin'))
 router.route('').get(userController.getUsers).post(userController.uploadUserImage, userController.resizeImage, userController.createUser);
 router.route('/:id').get(userController.getUser).patch(userController.uploadUserImage, userController.resizeImage,userController.updateUser)
