@@ -33,7 +33,10 @@ const userSchema = new mongoose.Schema({
         minlength:8,
         select:false
     },
-
+    passwordChangeAt: Date,
+    passwordResetCode: String,
+    passwordResetExpires: Date,
+    passwordResetVerified: Boolean,
     role:{
         type: String,
         enum:['user', 'guest', 'admin'],
@@ -91,7 +94,7 @@ userSchema.pre('save', async function (next) {
 });
 
 const setImageURL = (doc) => {
-    if (doc.photo) {
+    if (doc.photo && !doc.photo.includes(`${process.env.SERVER_URL}`)) {
         const imageUrl = `${process.env.SERVER_URL}/user/${doc.photo}`;
         doc.photo = imageUrl;
     }
