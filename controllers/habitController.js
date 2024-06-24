@@ -190,7 +190,7 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
                     isAchieved : false ,
                     iconName: `ic_complete_${num}`,
                     counter: 0,
-                    point: num*3
+                    point: num
                 })
             }
             else if (req.query.language && req.query.language == 'en'){
@@ -200,7 +200,7 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
                 isAchieved : false ,
                 iconName: `ic_complete_${num}`,
                 counter: 0,
-                point: num*3
+                point: num
                 
                 })
             }
@@ -213,7 +213,7 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
                     isAchieved : false ,
                     iconName: `ic_complete_${num}`,
                     totalHabit: 0,
-                    point: num*3
+                    point: num
                 })
             }
             else if (req.query.language && req.query.language == 'en'){
@@ -223,7 +223,7 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
                 isAchieved: false,
                 iconName: `ic_complete_${num}`,
                 totalHabit: 0,
-                point: num*3
+                point: num
             })
             }
         }) 
@@ -235,17 +235,17 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
                     isAchieved : false ,
                     iconName: `ic_complete_${num}`,
                     totalHabit: 0,
-                    point: num*3
+                    point: num
                 })
             }
             else if (req.query.language && req.query.language == 'en'){
                 cdo.push({
                 achieveName: "consecutive days",
-                description: "perfect days 3 times (9 Points)",
+                description: `consecutive days ${num} times (${num*3} Points)`,
                 isAchieved: false,
-                iconName: "ic_complete_3",
+                iconName: `ic_complete_${num}`,
                 totalHabit: 0,
-                point: num*3
+                point: num
             })
             }
         }) 
@@ -342,49 +342,49 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
         ], cdo = [
             {
                 achieveName: "consecutive days",
-                description: "perfect days 3 times (9 Points)",
+                description: "consecutive days 3 times (9 Points)",
                 isAchieved: false,
                 iconName: "ic_complete_3",
                 totalHabit: 0
             }, {
                 achieveName: "consecutive days",
-                description: "perfect days 10 times (30 Points)",
+                description: "consecutive days 10 times (30 Points)",
                 isAchieved: false,
                 iconName: "ic_complete_10",
                 totalHabit: 0
             }, {
                 achieveName: "consecutive days",
-                description: "perfect days 20 times (60 Points)",
+                description: "consecutive days 20 times (60 Points)",
                 isAchieved: false,
                 iconName: "ic_complete_20",
                 totalHabit: 0
             }, {
                 achieveName: "consecutive days",
-                description: "perfect days 30 times (90 Points)",
+                description: "consecutive days 30 times (90 Points)",
                 isAchieved: false,
                 iconName: "ic_complete_30",
                 totalHabit: 0
             }, {
                 achieveName: "consecutive days",
-                description: "perfect days 40 times (120 Points)",
+                description: "consecutive days 40 times (120 Points)",
                 isAchieved: false,
                 iconName: "ic_complete_40",
                 totalHabit: 0
             }, {
                 achieveName: "consecutive days",
-                description: "perfect days 50 times (150 Points)",
+                description: "consecutive days 50 times (150 Points)",
                 isAchieved: false,
                 iconName: "ic_complete_50",
                 totalHabit: 0
             }, {
                 achieveName: "consecutive days",
-                description: "perfect days 80 times (240 Points)",
+                description: "consecutive days 80 times (240 Points)",
                 isAchieved: false,
                 iconName: "ic_complete_80",
                 totalHabit: 0
             }, {
                 achieveName: "consecutive days",
-                description: "perfect days 100 times (300 Points)",
+                description: "consecutive days 100 times (300 Points)",
                 isAchieved: false,
                 iconName: "ic_complete_100",
                 totalHabit: 0
