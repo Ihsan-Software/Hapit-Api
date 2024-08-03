@@ -43,10 +43,6 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-        degree: {
-        type: Number,
-        default: 0
-    },
     level: {
         type: Number,
         default: 0
@@ -55,7 +51,23 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: new Date()
     },
-
+    // for today open
+    daysOfWeek: {
+        type: Object,
+        default: {
+            Sunday: 0,
+            Monday: 0,
+            Tuesday: 0,
+            Wednesday: 0,
+            Thursday: 0,
+            Friday: 0,
+            Saturday: 0,
+        }
+    },
+    lastUpdated: {
+        type: Date,
+        default: Date.now
+    }
 },
     {timestamps: true},
     /*{
