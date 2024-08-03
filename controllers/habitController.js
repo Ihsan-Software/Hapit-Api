@@ -41,7 +41,6 @@ exports.setSpecialDayAndTime = catchAsync(async(req, res, next)=>{
         var date = new Date();
         var dayIndex = date.getDay();
         var todayName = daysOfWeek[dayIndex];
-        console.log(todayName);
         currentDay = todayName;
     }
     req.query.specialTime = currentTime;
@@ -107,15 +106,6 @@ exports.unCheck = catchAsync(async (req, res, next) => {
 
 exports.getTodayHabits = catchAsync(async (req, res, next) => {
 
-    // update user degree if it open app in new day
-    const user = await User.findById(req.user.id);
-    let newDegree = user.degree + 3;
-
-    if(new Date().toISOString().split('T')[0] > user.todayOpen.toISOString().split('T')[0]) {
-        await User.findByIdAndUpdate(req.user.id, { degree: newDegree, todayOpen: new Date()});
-    }
-    
-    
     console.log('start return getTodayHabitsProcess')
     result = []
     console.log("from return  model", req.query.specialTime, req.query.specialDay);
@@ -123,9 +113,9 @@ exports.getTodayHabits = catchAsync(async (req, res, next) => {
     console.log(req.user.id);
     console.log(req.query.specialTime);
     console.log( req.query.specialDay);
-    var activeHabits = await Habit.find({ $and: [{ date:req.query.specialTime}, { user: req.user.id },{ appearDays:  req.query.specialDay }]});
+    var activeHabits = await Habit.find({ $and: [{ date:req.query.specialTime}, { user: req.user.id },{ appearDays:  req.query.specialDay },{ counter:  { $lt: 90 } }]});
     var notActiveHabits = await Habit.find({
-        $and: [{ date: { $not: { $eq: req.query.specialTime } } }, { appearDays:  req.query.specialDay }, { user: req.user.id }, {
+        $and: [{ date: { $not: { $eq: req.query.specialTime } } }, { appearDays:  req.query.specialDay }, { user: req.user.id },{ counter:  { $lt: 90 } }, {
         $expr: {
             $lte: [
                 { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
@@ -174,6 +164,63 @@ exports.getTodayHabits = catchAsync(async (req, res, next) => {
         },
     });
     }
+})
+
+exports.addDegreeForTodayOpen = catchAsync(async (req, res, next) => {
+    // update user degree if it open app in new day
+    let daysOfWeek = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+    ],
+    date,
+    dayIndex,
+    todayName;
+    date = new Date();
+    dayIndex = date.getDay();
+    todayName = daysOfWeek[dayIndex];
+    // update user total degree if it open app in new day
+    const user = await User.findById(req.user.id);
+    let newDegree = user.totalDegree + 3;
+
+    if(new Date().toISOString().split('T')[0] > user.todayOpen.toISOString().split('T')[0]) {
+        await User.findByIdAndUpdate(req.user.id, { totalDegree: newDegree, todayOpen: new Date()});
+    }
+    // end update user total degree if it open app in new day
+
+    // update how many user use tha app in days
+    
+    // check if we in new week
+    const now = new Date();
+    const lastDate = new Date(user.lastUpdated);
+
+    // Calculate the difference in days
+    const dayDifference = Math.floor((now - lastDate) / (1000 * 60 * 60 * 24));
+    // Check if we are in a new week (Sunday is considered the start of the week)
+    const newWeekStarted = now.getDay() < lastDate.getDay() || dayDifference >= 7;
+    // end check if we in new week
+    const updateField = `daysOfWeek.${todayName}`;
+    if (newWeekStarted) {
+        // Reset daysOfWeekObj if a new week has started
+        let restDaysOfWeek = {
+            Sunday: 0,
+            Monday: 0,
+            Tuesday: 0,
+            Wednesday: 0,
+            Thursday: 0,
+            Friday: 0,
+            Saturday: 0,
+        };
+        await User.findByIdAndUpdate(req.user.id, { daysOfWeek: restDaysOfWeek, lastUpdated: new Date()});
+    }
+
+        // Increment the value for the specific day
+    await User.findByIdAndUpdate(req.user.id,{ $inc: { [updateField]: 1 } })
+    next();
 })
 
 // Aggregation
@@ -260,9 +307,9 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
                 counter: 0
             }, {
                 achieveName: "Complete Habit",
-                description: "Complete Habit 2 times (6 Points)",
+                description: "Complete Habit 10 times (30 Points)",
                 isAchieved: false,
-                iconName: "ic_complete_2",
+                iconName: "ic_complete_10",
                 counter: 0
             }, {
                 achieveName: "Complete Habit",
@@ -551,8 +598,6 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
         
     })
     // End Consecutive Days
-    const user = await User.findById(userID);
-    userDegree += user.degree;
     userLevel = Math.floor(userDegree / 10); 
     // update user degree and level
 
@@ -585,43 +630,47 @@ exports.userAchievements = catchAsync(async (req, res, next) => {
 })
 
 exports.statistics = catchAsync(async (req, res, next) => {
-    const habits = await Habit.aggregate([
-        {   
-            $match: {
-            user: new ObjectId(`${req.user.id}`)
-            }
+    // get habits percentage
+    const habitsPercentage = await Habit.aggregate([
+      {
+        $match: {
+          user: new ObjectId(`${req.user.id}`),
         },
-        {
-            $unwind: "$date"
+      },
+      {
+        $unwind: "$date",
+      },
+      {
+        $group: {
+          _id: { name: "$name", icon: "$icon" },
+          count: { $sum: 1 },
         },
-        {
-            $group: {
-            _id: { name: "$name", icon: "$icon" },
-            count: { $sum: 1 }
-            }
+      },
+      {
+        $group: {
+          _id: null,
+          totalCount: { $sum: "$count" },
+          habits: {
+            $push: { name: "$_id.name", icon: "$_id.icon", count: "$count" },
+          },
         },
-        {
-            $group: {
-            _id: null,
-            totalCount: { $sum: "$count" },
-            habits: { $push: { name: "$_id.name", icon: "$_id.icon", count: "$count" } }
-            }
+      },
+      {
+        $unwind: "$habits",
+      },
+      {
+        $project: {
+          _id: 0,
+          name: "$habits.name",
+          icon: "$habits.icon",
+          count: "$habits.count",
+          percentage: {
+            $multiply: [{ $divide: ["$habits.count", "$totalCount"] }, 100],
+          },
         },
-        {
-            $unwind: "$habits"
-        },
-        {
-            $project: {
-            _id: 0,
-            name: "$habits.name",
-            icon: "$habits.icon",
-            count: "$habits.count",
-            percentage: {
-                $multiply: [{ $divide: ["$habits.count", "$totalCount"] }, 100]
-            }
-            }
-        }
+      },
     ]);
+    // get mood count
     const moods = await Mood.aggregate([
         {   
             $match: {
@@ -640,26 +689,42 @@ exports.statistics = catchAsync(async (req, res, next) => {
             totalCount: { $sum: "$count" },
             moods: { $push: { name: "$_id", count: "$count" } }
             }
-        },
-        {
-            $unwind: "$moods"
-        },
-        {
-            $project: {
-            _id: 0,
-            name: "$moods.name",
-            count: "$moods.count",
-            percentage: {
-                $multiply: [{ $divide: ["$moods.count", "$totalCount"] }, 100]
-            }
-            }
         }
     ])
+    // get open app count in day
+    const dailyOpening = req.user.daysOfWeek;
+
+    // get use sequence, degree and level 
+    const users = await User.find().sort({ totalDegree: -1 }).select(" bio name photo totalDegree level"); let useSequence=0,userDegree = 0, userLevel = 0;
+    for (let i = 0; i < users.length; i++) { 
+        if (users[i]._id.toString() == req.user._id.toString()) {
+            useSequence = i + 1
+            userDegree = users[i].totalDegree
+            userLevel = users[i].level
+            break;
+        }
+    }
+    // get number of user achievement
+    let numberOfUserAchievement = 0;
+    req.userDetails.achievements.forEach(ele => {
+        if (ele.isAchieved) {
+            numberOfUserAchievement += 1
+        }
+    })
+    // get user habits 
+    const userHabits = await Habit.find({ user: req.user.id }).count();
 
     res.status(200).json({
         status: "success",
         requestTime: req.requestTime,
-        habits,
-        moods
+        habitsPercentage,
+        moods:moods[0].moods,
+        dailyOpening,
+        useSequence,
+        numberOfUserAchievement,
+        userDegree,
+        moodsCounter:moods[0].totalCount,
+        userLevel,
+        userHabits
     });
 });
