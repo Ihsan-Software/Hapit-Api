@@ -38,7 +38,7 @@ exports.getWeeklyMoods = catchAsync(async (req, res, next) => {
         {
             $match: {
                 $expr: {
-                    $and: [{ user: req.user.id },
+                    $and: [{user: new ObjectId(`${req.user.id}`)},
                     {
                         $eq: [
                         { $year: { $dateFromString: { dateString: "$date" } } },
