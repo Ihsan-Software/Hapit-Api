@@ -37,6 +37,9 @@ const userSchema = new mongoose.Schema({
     passwordResetCode: String,
     passwordResetExpires: Date,
     passwordResetVerified: Boolean,
+    emailVerifiedCode: String,
+    emailVerifiedExpires: Date,
+    emailVerified: Boolean,
     role:{
         type: String,
         enum:['user', 'guest', 'admin'],
