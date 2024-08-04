@@ -29,37 +29,38 @@ exports.getMyMoods = catchAsync(async (req, res, next) => {
 
 
 exports.getWeeklyMoods = catchAsync(async (req, res, next) => {
-    const year = req.query.moodDate.split('-')[0]
-    const month = req.query.moodDate.split('-')[1] 
-    const day = req.query.moodDate.split('-')[2] * 1 + 6
-    let end = ''
-    if (day <= 9){
-        end= `0${day}`
-    }
-    else{
-        end= `${day}`
-    }
-    
-    console.log(end)
-    const mood = await Mood.aggregate([
+    const year = parseInt(req.query.moodDate.split("-")[0], 10);
+    const month = parseInt(req.query.moodDate.split("-")[1], 10);
+
+    // Use aggregation to find matching documents
+    const moods = await Mood.aggregate([
+      // Stage 1: Match documents with the same year and month
         {
             $match: {
-                
-                $and: [{user: new ObjectId(`${req.user.id}`)},{date: { $gte: req.query.moodDate }}, {date: { $lte: `${year}-${month}-${end}` }}]
-            }
+                $expr: {
+                    $and: [{ user: req.user.id },
+                    {
+                        $eq: [
+                        { $year: { $dateFromString: { dateString: "$date" } } },
+                        year,
+                        ],
+                    },
+                    {
+                        $eq: [
+                        { $month: { $dateFromString: { dateString: "$date" } } },
+                        month,
+                        ],
+                    },
+                    ],
+                },
+            },
         },
-        {
-            $project:{
-                __v:0
-                }
-        }
-    ])
+    ]);
 
     res.status(200).json({
         status: 'success',
         requestTime: req.requestTime,
-        moodsCounter:mood.length,
-        mood
-        
+        moodsCounter:moods.length,
+        moods
     });
 });
