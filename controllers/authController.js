@@ -21,13 +21,12 @@ const sendToken = (user, statusCode, res) => {
 
 exports.signup = catchAsync(async (req, res, next) => {
   // Get User Info From Client Side...
-  const newUser = await User.create({
+  await User.create({
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
   });
-
-  sendToken(newUser, 201, res);
+  next()
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -154,7 +153,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         
 
     // 3) Send the reset code via email
-    const message = `Hi ${user.name},\n We received a request to reset the password on your Habit-App Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The Habit-App Team`;
+    const message = `Hi ${user.name},\n We received a request to reset the password on your Habit-App Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The Habit-App Team, developer: 'Mohammed Arsalan, ✨️.'`;
     try {
         await sendEmail({
         email: user.email,
@@ -247,4 +246,83 @@ exports.logout = catchAsync(async (req, res, next) => {
     httpOnly: true,
   });
   res.redirect("/");
+});
+
+// verify email
+exports.verifyEmail = catchAsync(async (req, res, next) => {
+
+  const user = await User.findOne({ email: req.body.email });
+  // 1) Generate hash reset random 6 digits and save it in db
+
+  const verifiedCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedVerifiedCode = crypto
+    .createHash("sha256")
+    .update(verifiedCode)
+    .digest("hex");
+
+  // Save hashed password reset code into db
+  // Add expiration time for password reset code (10 min)
+  await User.findByIdAndUpdate(
+    user._id,
+    {
+      emailVerifiedCode: hashedVerifiedCode,
+      emailVerifiedExpires: Date.now() + 2 * 60 * 1000,
+      emailVerified: false,
+    },
+    { new: true }
+  );
+
+  // 3) Send the reset code via email
+  const message = `Hi ${user.name},\n We received a request to verified email on your Habit-App Account. \n ${verifiedCode} \n Enter this code to complete the verification. \n Thanks for helping us keep your account secure.\n The Habit-App Team,developer: 'Mohammed Arsalan, ✨️.'`;
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Your verified email code (valid for 2 min)",
+      message,
+    });
+  } catch (err) {
+    await User.findByIdAndDelete(user._id);
+    return next(new AppError("There is an error in sending email", 500));
+  }
+
+  res
+    .status(200)
+    .json({ status: "Success", message: "verified email code sent to email" });
+});
+
+
+exports.verifyEmailCode = catchAsync(async (req, res, next) => {
+  // 1) Get user based on reset code
+  const hashedResetCode = crypto
+    .createHash("sha256")
+    .update(req.body.verifiedCode)
+    .digest("hex");
+
+  const user = await User.findOne({
+    emailVerifiedCode: hashedResetCode});
+  if (!user) {
+    return next(new AppError("verified code invalid, please enter valid code", 404));
+  }
+
+  const isExpired = await User.findOne({
+      emailVerifiedCode: hashedResetCode,
+      emailVerifiedExpires: { $gt: Date.now() },
+    });
+
+  if (!isExpired) {
+    await User.findByIdAndDelete(user._id);
+    return next(new AppError("verified code expired, please try again", 500));
+  }
+  // 2) Reset code valid
+  await User.findByIdAndUpdate(
+    user._id,
+    {
+      emailVerifiedCode: "",
+      emailVerifiedExpires: undefined,
+      emailVerified: true
+    },
+    { new: true }
+  );
+
+  sendToken(user, 201, res);
 });
