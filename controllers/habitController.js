@@ -713,7 +713,9 @@ exports.statistics = catchAsync(async (req, res, next) => {
     })
     // get user habits 
     const userHabits = await Habit.find({ user: req.user.id }).count();
-
+    // get user acquired habit 
+    const userAcquiredHabits = await Habit.find({ user: req.user.id, counter: { $gte: 90 } }).select("  name icon");;
+    
     res.status(200).json({
         status: "success",
         requestTime: req.requestTime,
@@ -725,6 +727,7 @@ exports.statistics = catchAsync(async (req, res, next) => {
         userDegree,
         moodsCounter:moods[0].totalCount,
         userLevel,
-        userHabits
+        userHabits,
+        userAcquiredHabits
     });
 });
