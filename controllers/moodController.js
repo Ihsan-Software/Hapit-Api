@@ -35,10 +35,15 @@ exports.getWeeklyMoods = catchAsync(async (req, res, next) => {
     // Use aggregation to find matching documents
     const moods = await Mood.aggregate([
       // Stage 1: Match documents with the same year and month
+        {   
+            $match: {
+                user: new ObjectId(`${req.user.id}`)
+            }
+        },
         {
             $match: {
                 $expr: {
-                    $and: [{user: new ObjectId(`${req.user.id}`)},
+                    $and: [
                     {
                         $eq: [
                         { $year: { $dateFromString: { dateString: "$date" } } },
