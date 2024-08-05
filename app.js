@@ -1,12 +1,14 @@
 const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
+const cors = require("cors");// allow access from all origins
+const compression = require("compression");// for compression request
 
 //security
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
-
+const hpp = require("hpp");
 // req from my modules
 const userRouter = require("./routers/userRoutes");
 const habitRouter = require("./routers/habitRoutes");
@@ -18,9 +20,13 @@ const globalHandlingError = require("./controllers/errorController");
 
 const app = express();
 // Middleware Functions...
-// For Accept Input From User And Formated It As JSON...
+// For Accept Input From User And Formate It As JSON...
 
-//security/ 2)helemt  to security http headers
+app.use(cors());
+app.options('*', cors()) // include before other routes
+app.use(compression());
+
+//security/ 2)helmet  to security http headers
 app.use(helmet());
 
 app.use(express.json({ limit: "10kb" }));
@@ -42,15 +48,15 @@ app.use((req, res, next) => {
   next();
 });
 
-//security/ 1)limituser response
+//security/ 1)limiter response
 
-// const limeter  = rateLimit({
-//     max:100,
-//     windowMs: 60*60*1000,
-//     message:' many requests come from this IP,please try in an hour...!'
-// });
-// app.use('/api', limeter);
-
+const limiter  = rateLimit({
+  windowMs: 10*60*1000,
+    max:60,
+    message:' many requests come from this IP,please try in an hour...!'
+});
+app.use(limiter);
+app.use(hpp());
 // Routers
 app.use("/users", userRouter);
 app.use("/habits", habitRouter);
