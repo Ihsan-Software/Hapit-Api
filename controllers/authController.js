@@ -132,7 +132,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     }
     // 2) If user exist, Generate hash reset random 6 digits and save it in db
 
-    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
     const hashedResetCode = crypto
         .createHash("sha256")
         .update(resetCode)
@@ -145,7 +145,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
             user._id,
             {
             passwordResetCode: hashedResetCode,
-            passwordResetExpires: Date.now() + 10 * 60 * 1000,
+            passwordResetExpires: Date.now() + 2 * 60 * 1000,
             passwordResetVerified: false
             },
             { new: true }
@@ -153,11 +153,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         
 
     // 3) Send the reset code via email
-    const message = `Hi ${user.name},\n We received a request to reset the password on your Habit-App Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The Habit-App Team, developer: 'Mohammed Arsalan, ✨️.'`;
+    const message = `Hi ${user.name},\n We received a request to reset the password on your Habit-App Account. \n ${resetCode} \n Enter this code to complete the reset. \n Thanks for helping us keep your account secure.\n The Habit-App Team, developer: Mohammed Arsalan, ✨️.`;
     try {
         await sendEmail({
         email: user.email,
-        subject: "Your password reset code (valid for 10 min)",
+        subject: "Your password reset code (valid for 2 min)",
         message,
         });
     } catch (err) {
@@ -254,7 +254,7 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
   // 1) Generate hash reset random 6 digits and save it in db
 
-  const verifiedCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const verifiedCode = Math.floor(1000 + Math.random() * 9000).toString();
   const hashedVerifiedCode = crypto
     .createHash("sha256")
     .update(verifiedCode)
@@ -273,7 +273,7 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   );
 
   // 3) Send the reset code via email
-  const message = `Hi ${user.name},\n We received a request to verified email on your Habit-App Account. \n ${verifiedCode} \n Enter this code to complete the verification. \n Thanks for helping us keep your account secure.\n The Habit-App Team,developer: 'Mohammed Arsalan, ✨️.'`;
+  const message = `Hi ${user.name},\n We received a request to verified email on your Habit-App Account. \n ${verifiedCode} \n Enter this code to complete the verification. \n Thanks for helping us keep your account secure.\n The Habit-App Team,developer: Mohammed Arsalan, ✨️.`;
   try {
     await sendEmail({
       email: user.email,
