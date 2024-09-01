@@ -173,25 +173,41 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         return next(new AppError("There is an error in sending email", 500));
     }
 
-    res.status(200).json({ status: "Success", message: "Reset code sent to email" });
+    res.status(200).json({ status: "success", message: "Reset code sent to email" });
 });
 
 // @desc    Verify password reset code
 // @route   POST /api/v1/auth/verifyResetCode
 // @access  Public
 exports.verifyPassResetCode = catchAsync(async (req, res, next) => {
-    // 1) Get user based on reset code
+
+  // 1) Get user based on reset code
+  let resetCode = req.body.resetCode
+  console.log(typeof resetCode);
+  if (typeof (resetCode) !== "string") {
+    resetCode = resetCode.toString()
+  }
+  console.log(typeof resetCode);
     const hashedResetCode = crypto
         .createHash("sha256")
-        .update(req.body.resetCode)
+        .update(resetCode)
         .digest("hex");
 
     const user = await User.findOne({
+      passwordResetCode: hashedResetCode,
+    });
+    if (!user) {
+      return next(
+        new AppError("verified code invalid, please enter valid code", 404)
+      );
+    }
+  
+    const isExpired = await User.findOne({
         passwordResetCode: hashedResetCode,
         passwordResetExpires: { $gt: Date.now() },
     });
-    if (!user) {
-        return next(new AppError("Reset code invalid or expired"));
+    if (!isExpired) {
+      return next(new AppError("Reset code expired, please try again", 410));
     }
 
     // 2) Reset code valid
@@ -204,7 +220,7 @@ exports.verifyPassResetCode = catchAsync(async (req, res, next) => {
         );
 
     res.status(200).json({
-        status: "Success",
+        status: "success",
     });
 });
 
@@ -287,7 +303,7 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
 
   res
     .status(200)
-    .json({ status: "Success", message: "verified email code sent to email" });
+    .json({ status: "success", message: "verified email code sent to email" });
 });
 
 
