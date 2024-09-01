@@ -108,6 +108,19 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
+userSchema.pre('findOneAndUpdate', async function (next) {
+    // Get the update object
+    const update = this.getUpdate();
+
+    // Check if the password is being modified
+    if (update.password) {
+        // Hash the new password
+        update.password = await bcrypt.hash(update.password, 12);
+    }
+
+    next();
+});
+
 const setImageURL = (doc) => {
     if (doc.photo && !doc.photo.includes(`${process.env.SERVER_URL}`)) {
         const imageUrl = `${process.env.SERVER_URL}/user/${doc.photo}`;
