@@ -1,5 +1,5 @@
 const multer = require('multer');
-const appError = require('./appError');
+const appError = require('../utils/appError');
 
 const multerOptions = () => {
 

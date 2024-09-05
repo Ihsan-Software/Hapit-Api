@@ -6,7 +6,7 @@ const catchAsync = require("../utils/catchAsync");
 const factory = require("../controllers/handlerController");
 
 // for image
-const { uploadSingleImage } = require("../utils/uploadImageMiddleware");
+const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 
 // use buffer from Memory Storage
 exports.resizeImage = catchAsync(async (req, res, next) => {
@@ -48,8 +48,8 @@ exports.updateLoggedUserData = catchAsync(async (req, res, next) => {
 
     let bio = req.body.bio
     console.log(typeof bio);
-    if (typeof (bio) !== "string") {
-        bio = bio.toString()
+    if (req.body.bio && typeof bio !== "string") {
+      bio = bio.toString();
     }
     console.log(typeof bio);
     const updatedUser = await User.findByIdAndUpdate(
@@ -69,7 +69,7 @@ exports.updateLoggedUserData = catchAsync(async (req, res, next) => {
 exports.updateUserBio = catchAsync(async (req, res, next) => {
         let bio = req.body.bio;
         console.log(typeof bio);
-        if (typeof bio !== "string") {
+        if (req.body.bio && typeof bio !== "string") {
             bio = bio.toString();
         }
         console.log(typeof bio);
