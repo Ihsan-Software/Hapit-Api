@@ -309,9 +309,15 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
 
 exports.verifyEmailCode = catchAsync(async (req, res, next) => {
   // 1) Get user based on reset code
+    let verifiedCode = req.body.verifiedCode;
+    console.log(typeof verifiedCode);
+    if (typeof verifiedCode !== "string") {
+      verifiedCode = verifiedCode.toString();
+    }
+    console.log(typeof verifiedCode);
   const hashedResetCode = crypto
     .createHash("sha256")
-    .update(req.body.verifiedCode)
+    .update(verifiedCode)
     .digest("hex");
 
   const user = await User.findOne({
