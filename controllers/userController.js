@@ -45,12 +45,19 @@ exports.getME = (req, res, next) => {
 };
 
 exports.updateLoggedUserData = catchAsync(async (req, res, next) => {
+
+    let bio = req.body.bio
+    console.log(typeof bio);
+    if (typeof (bio) !== "string") {
+        bio = bio.toString()
+    }
+    console.log(typeof bio);
     const updatedUser = await User.findByIdAndUpdate(
         req.user._id,
         {
         name: req.body.name,
         photo: req.body.photo,
-        bio: req.body.bio
+        bio: bio
         },
         { new: true }
     );
@@ -60,10 +67,16 @@ exports.updateLoggedUserData = catchAsync(async (req, res, next) => {
 
 
 exports.updateUserBio = catchAsync(async (req, res, next) => {
+        let bio = req.body.bio;
+        console.log(typeof bio);
+        if (typeof bio !== "string") {
+            bio = bio.toString();
+        }
+        console.log(typeof bio);
     const updatedUser = await User.findByIdAndUpdate(
         req.user._id,
         {
-        bio: req.body.bio
+        bio: bio
         },
         { new: true }
     );
