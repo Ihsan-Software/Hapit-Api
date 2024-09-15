@@ -50,12 +50,12 @@ app.use((req, res, next) => {
 
 //security/ 1)limiter response
 
-const limiter  = rateLimit({
+/*const limiter  = rateLimit({
   windowMs: 10*60*1000,
     max:60,
     message:' many requests come from this IP,please try in an hour...!'
 });
-app.use(limiter);
+app.use(limiter);*/
 app.use(hpp());
 // Routers
 app.use("/users", userRouter);
